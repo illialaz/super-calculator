@@ -1,26 +1,471 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import './app.css'
+
+const operations = {
+  plus: '+',
+  minus: '-',
+  mult: '*',
+  div: '/',
 }
 
-export default App;
+type RoundOperationsType = {
+  [key: string]: string,
+};
+
+const roundOptions: RoundOperationsType = {
+  math: 'Математическое',
+  acc: 'Банковское',
+  trunc: 'Усеченное'
+}
+
+export const App: FC = () => {
+  const [firstNumber, setFirstNumber] = useState('0')
+  const [secondNumber, setSecondNumber] = useState('0')
+  const [thirdNumber, setThirdNumber] = useState('0')
+  const [fourthNumber, setFourthNumber] = useState('0')
+  const [firstOperation, setFirstOperation] = useState('')
+  const [secondOperation, setSecondOperation] = useState('')
+  const [thirdOperation, setThirdOperation] = useState('')
+  const [result, setResult] = useState('0')
+  const [roundedResult, setRoundedResult] = useState('0')
+  const [roundOption, setRoundOption] = useState(roundOptions.math)
+  const firstPlusRef = useRef<HTMLDivElement>(null)
+  const firstMinusRef = useRef<HTMLDivElement>(null)
+  const firstMultRef = useRef<HTMLDivElement>(null)
+  const firstDivRef = useRef<HTMLDivElement>(null)
+  const secondPlusRef = useRef<HTMLDivElement>(null)
+  const secondMinusRef = useRef<HTMLDivElement>(null)
+  const secondMultRef = useRef<HTMLDivElement>(null)
+  const secondDivRef = useRef<HTMLDivElement>(null)
+  const thirdPlusRef = useRef<HTMLDivElement>(null)
+  const thirdMinusRef = useRef<HTMLDivElement>(null)
+  const thirdMultRef = useRef<HTMLDivElement>(null)
+  const thirdDivRef = useRef<HTMLDivElement>(null)
+
+  const setFirstValue = (event: ChangeEvent & { target: HTMLInputElement }) => {
+    setFirstNumber(event.target.value)
+  }
+
+  const setSecondValue = (
+    event: ChangeEvent & { target: HTMLInputElement }
+  ) => {
+    setSecondNumber(event.target.value)
+  }
+
+  const setThirdValue = (event: ChangeEvent & { target: HTMLInputElement }) => {
+    setThirdNumber(event.target.value)
+  }
+
+  const setFourthValue = (
+    event: ChangeEvent & { target: HTMLInputElement }
+  ) => {
+    setFourthNumber(event.target.value)
+  }
+
+  const setRoundOptionValue = (
+    event: ChangeEvent<HTMLSelectElement> & { target: HTMLInputElement }
+  ) => {
+    setRoundOption(event.target.value);
+  }
+
+  const checkCorrectSpaces = (numberString: string) => {
+    const splitDigits = numberString.split('.').map((item) =>
+      item
+        .split('')
+        .reverse()
+        .join('')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+    )
+
+    if (splitDigits.length > 2) {
+      return 'error'
+    }
+
+    const isDigitsCorrect = splitDigits.reduce((acc, item) => {
+      if (item.includes(' ')) {
+        const itemArray = item.split('')
+        const spacePosition = 3
+        for (let i = spacePosition; i < itemArray.length; i = i + spacePosition + 1) {
+          if (itemArray[i] !== ' ') {
+            return false
+          }
+        }
+      }
+
+      return acc && true
+    }, true)
+
+    return isDigitsCorrect ? numberString : 'error'
+  }
+
+  const fractionDigit = 6
+
+  const calcResult = () => {
+
+    const adaptedFirstNumber = checkCorrectSpaces(
+      firstNumber.replaceAll(',', '.')
+    ).replaceAll(' ', '')
+    const adaptedSecondNumber = checkCorrectSpaces(
+      secondNumber.replaceAll(',', '.')
+    ).replaceAll(' ', '')
+    const adaptedThirdNumber = checkCorrectSpaces(
+      thirdNumber.replaceAll(',', '.')
+    ).replaceAll(' ', '')
+    const adaptedFourthNumber = checkCorrectSpaces(
+      fourthNumber.replaceAll(',', '.')
+    ).replaceAll(' ', '')
+
+    if (
+      !(
+        `${parseFloat(adaptedFirstNumber)}` === adaptedFirstNumber &&
+        `${parseFloat(adaptedSecondNumber)}` === adaptedSecondNumber &&
+        `${parseFloat(adaptedThirdNumber)}` === adaptedThirdNumber &&
+        `${parseFloat(adaptedFourthNumber)}` === adaptedFourthNumber
+      )
+    ) {
+      setResult('error')
+
+      return
+    }
+
+    const floatFirstNumber = parseFloat(adaptedFirstNumber)
+    const floatSecondNumber = parseFloat(adaptedSecondNumber)
+    const floatThirdNumber = parseFloat(adaptedThirdNumber)
+    const floatFourthNumber = parseFloat(adaptedFourthNumber)
+
+    let result = 0
+
+    if (secondOperation === operations.plus) {
+      result = parseFloat(
+        (floatSecondNumber + floatThirdNumber).toFixed(fractionDigit)
+      )
+    }
+
+    if (secondOperation === operations.minus) {
+      result = parseFloat(
+        (floatSecondNumber - floatThirdNumber).toFixed(fractionDigit)
+      )
+    }
+
+    if (secondOperation === operations.mult) {
+      result = parseFloat(
+        (floatSecondNumber * floatThirdNumber).toFixed(fractionDigit)
+      )
+    }
+
+    if (secondOperation === operations.div) {
+      result = parseFloat(
+        (floatSecondNumber / floatThirdNumber).toFixed(fractionDigit)
+      )
+    }
+
+    if (thirdOperation === operations.mult) {
+      result = parseFloat((result * floatFourthNumber).toFixed(fractionDigit))
+    }
+
+    if (thirdOperation === operations.div) {
+      result = parseFloat((result / floatFourthNumber).toFixed(fractionDigit))
+    }
+
+    if (firstOperation === operations.plus) {
+      result = parseFloat((floatFirstNumber + result).toFixed(fractionDigit))
+    }
+
+    if (firstOperation === operations.minus) {
+      result = parseFloat((floatFirstNumber - result).toFixed(fractionDigit))
+    }
+
+    if (firstOperation === operations.mult) {
+      result = parseFloat((floatFirstNumber * result).toFixed(fractionDigit))
+    }
+
+    if (firstOperation === operations.div) {
+      result = parseFloat((floatFirstNumber / result).toFixed(fractionDigit))
+    }
+
+    if (thirdOperation === operations.plus) {
+      result = parseFloat((result + floatFourthNumber).toFixed(fractionDigit))
+    }
+
+    if (thirdOperation === operations.minus) {
+      result = parseFloat((result - floatFourthNumber).toFixed(fractionDigit))
+    }
+
+    setResult(result.toFixed(fractionDigit))
+  }
+
+  const evenRound = (num: number, decimalPlaces: number = 0) => {
+    const d = decimalPlaces;
+    const m = Math.pow(10, d);
+    const n = +(d ? num * m : num).toFixed(fractionDigit);
+    const i = Math.floor(n), f = n - i;
+    const e = 1e-8;
+    const r = (f > 0.5 - e && f < 0.5 + e) ?
+                ((i % 2 === 0) ? i : i + 1) : Math.round(n);
+    return d ? r / m : r;
+}
+
+  const calcRoundedResult = () => {
+    let roundRes = result;
+
+    if (roundOption === 'math') {
+      roundRes = Math.round(parseFloat(result)).toFixed(fractionDigit)
+    }
+
+    if (roundOption === 'trunc') {
+      roundRes = Math.floor(parseFloat(result)).toFixed(fractionDigit)
+    }
+
+    if (roundOption === 'acc') {
+      roundRes = evenRound(parseFloat(result)).toFixed(fractionDigit);
+    }
+
+    setRoundedResult(roundRes);
+  }
+
+  useEffect(() => {
+    if (firstOperation === operations.plus) {
+      firstPlusRef.current?.classList.add('selected')
+      firstMinusRef.current?.classList.remove('selected')
+      firstMultRef.current?.classList.remove('selected')
+      firstDivRef.current?.classList.remove('selected')
+    }
+
+    if (firstOperation === operations.minus) {
+      firstMinusRef.current?.classList.add('selected')
+      firstPlusRef.current?.classList.remove('selected')
+      firstMultRef.current?.classList.remove('selected')
+      firstDivRef.current?.classList.remove('selected')
+    }
+
+    if (firstOperation === operations.mult) {
+      firstMultRef.current?.classList.add('selected')
+      firstMinusRef.current?.classList.remove('selected')
+      firstPlusRef.current?.classList.remove('selected')
+      firstDivRef.current?.classList.remove('selected')
+    }
+
+    if (firstOperation === operations.div) {
+      firstDivRef.current?.classList.add('selected')
+      firstPlusRef.current?.classList.remove('selected')
+      firstMinusRef.current?.classList.remove('selected')
+      firstMultRef.current?.classList.remove('selected')
+    }
+
+    if (secondOperation === operations.plus) {
+      secondPlusRef.current?.classList.add('selected')
+      secondMinusRef.current?.classList.remove('selected')
+      secondMultRef.current?.classList.remove('selected')
+      secondDivRef.current?.classList.remove('selected')
+    }
+
+    if (secondOperation === operations.minus) {
+      secondMinusRef.current?.classList.add('selected')
+      secondPlusRef.current?.classList.remove('selected')
+      secondMultRef.current?.classList.remove('selected')
+      secondDivRef.current?.classList.remove('selected')
+    }
+
+    if (secondOperation === operations.mult) {
+      secondMultRef.current?.classList.add('selected')
+      secondPlusRef.current?.classList.remove('selected')
+      secondMinusRef.current?.classList.remove('selected')
+      secondDivRef.current?.classList.remove('selected')
+    }
+
+    if (secondOperation === operations.div) {
+      secondDivRef.current?.classList.add('selected')
+      secondPlusRef.current?.classList.remove('selected')
+      secondMinusRef.current?.classList.remove('selected')
+      secondMultRef.current?.classList.remove('selected')
+    }
+
+    if (thirdOperation === operations.plus) {
+      thirdPlusRef.current?.classList.add('selected')
+      thirdMinusRef.current?.classList.remove('selected')
+      thirdMultRef.current?.classList.remove('selected')
+      thirdDivRef.current?.classList.remove('selected')
+    }
+
+    if (thirdOperation === operations.minus) {
+      thirdMinusRef.current?.classList.add('selected')
+      thirdPlusRef.current?.classList.remove('selected')
+      thirdMultRef.current?.classList.remove('selected')
+      thirdDivRef.current?.classList.remove('selected')
+    }
+
+    if (thirdOperation === operations.mult) {
+      thirdMultRef.current?.classList.add('selected')
+      thirdPlusRef.current?.classList.remove('selected')
+      thirdMinusRef.current?.classList.remove('selected')
+      thirdDivRef.current?.classList.remove('selected')
+    }
+
+    if (thirdOperation === operations.div) {
+      thirdDivRef.current?.classList.add('selected')
+      thirdPlusRef.current?.classList.remove('selected')
+      thirdMinusRef.current?.classList.remove('selected')
+      thirdMultRef.current?.classList.remove('selected')
+    }
+  }, [firstOperation, secondOperation, thirdOperation])
+
+  return (
+    <>
+      <section className="container">
+        <div className="number">
+          <label htmlFor="first-number">Первое число</label>
+          <input
+            type="text"
+            value={firstNumber}
+            onChange={setFirstValue}
+            id="first-number"
+          ></input>
+        </div>
+        <div className="operations">
+          <div
+            className="plus"
+            ref={firstPlusRef}
+            onClick={() => setFirstOperation(operations.plus)}
+          >
+            +
+          </div>
+          <div
+            className="minus"
+            ref={firstMinusRef}
+            onClick={() => setFirstOperation(operations.minus)}
+          >
+            -
+          </div>
+          <div
+            className="mult"
+            ref={firstMultRef}
+            onClick={() => setFirstOperation(operations.mult)}
+          >
+            *
+          </div>
+          <div
+            className="div"
+            ref={firstDivRef}
+            onClick={() => setFirstOperation(operations.div)}
+          >
+            /
+          </div>
+        </div>
+        <div className="bracket bracket-left">(</div>
+        <div className="number">
+          <label htmlFor="second-number">Второе число</label>
+          <input
+            type="text"
+            value={secondNumber}
+            onChange={setSecondValue}
+            id="second-number"
+          ></input>
+        </div>
+        <div className="operations">
+          <div
+            className="plus"
+            ref={secondPlusRef}
+            onClick={() => setSecondOperation(operations.plus)}
+          >
+            +
+          </div>
+          <div
+            className="minus"
+            ref={secondMinusRef}
+            onClick={() => setSecondOperation(operations.minus)}
+          >
+            -
+          </div>
+          <div
+            className="mult"
+            ref={secondMultRef}
+            onClick={() => setSecondOperation(operations.mult)}
+          >
+            *
+          </div>
+          <div
+            className="div"
+            ref={secondDivRef}
+            onClick={() => setSecondOperation(operations.div)}
+          >
+            /
+          </div>
+        </div>
+        <div className="number">
+          <label htmlFor="third-number">Третье число</label>
+          <input
+            type="text"
+            value={thirdNumber}
+            onChange={setThirdValue}
+            id="third-number"
+          ></input>
+        </div>
+        <div className="bracket bracket-right">)</div>
+        <div className="operations">
+          <div
+            className="plus"
+            ref={thirdPlusRef}
+            onClick={() => setThirdOperation(operations.plus)}
+          >
+            +
+          </div>
+          <div
+            className="minus"
+            ref={thirdMinusRef}
+            onClick={() => setThirdOperation(operations.minus)}
+          >
+            -
+          </div>
+          <div
+            className="mult"
+            ref={thirdMultRef}
+            onClick={() => setThirdOperation(operations.mult)}
+          >
+            *
+          </div>
+          <div
+            className="div"
+            ref={thirdDivRef}
+            onClick={() => setThirdOperation(operations.div)}
+          >
+            /
+          </div>
+        </div>
+        <div className="number">
+          <label htmlFor="fourth-number">Четвертое число</label>
+          <input
+            type="text"
+            value={fourthNumber}
+            onChange={setFourthValue}
+            id="fourth-number"
+          ></input>
+        </div>
+        <div className="number">
+          <div className="button" onClick={calcResult}>Получить результат</div>
+          <div>{result}</div>
+        </div>
+      </section>
+      <section className="container"></section>
+      <section className="container">
+        <div className="number">
+          <label htmlFor='round-options'>Вид округления</label>
+          <select
+            id='round-options'
+            defaultValue={roundOption}
+            onChange={setRoundOptionValue}
+          >
+            {Object.keys(roundOptions).map(key =>
+              <option key={key} value={key}>{roundOptions[key]}</option>
+            )}
+          </select>
+        </div>
+        <div className="number">
+          <div className="button" onClick={calcRoundedResult}>Получить округленный результат</div>
+          <div>{roundedResult}</div>
+        </div>
+      </section>
+    </>
+  )
+}
