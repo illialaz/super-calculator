@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC, useEffect, useRef, useState } from 'react'
+import BigNumber from 'bignumber.js'
 
 import './app.css'
 
@@ -117,12 +118,17 @@ export const App: FC = () => {
       fourthNumber.replaceAll(',', '.')
     ).replaceAll(' ', '')
 
+    const floatFirstNumber = new BigNumber(adaptedFirstNumber)
+    const floatSecondNumber = new BigNumber(adaptedSecondNumber)
+    const floatThirdNumber = new BigNumber(adaptedThirdNumber)
+    const floatFourthNumber = new BigNumber(adaptedFourthNumber)
+
     if (
       !(
-        `${parseFloat(adaptedFirstNumber)}` === adaptedFirstNumber &&
-        `${parseFloat(adaptedSecondNumber)}` === adaptedSecondNumber &&
-        `${parseFloat(adaptedThirdNumber)}` === adaptedThirdNumber &&
-        `${parseFloat(adaptedFourthNumber)}` === adaptedFourthNumber
+        `${floatFirstNumber.toString()}` === adaptedFirstNumber &&
+        `${floatSecondNumber.toString()}` === adaptedSecondNumber &&
+        `${floatThirdNumber.toString()}` === adaptedThirdNumber &&
+        `${floatFourthNumber.toString()}` === adaptedFourthNumber
       )
     ) {
       setResult('error')
@@ -130,67 +136,64 @@ export const App: FC = () => {
       return
     }
 
-    const floatFirstNumber = parseFloat(adaptedFirstNumber)
-    const floatSecondNumber = parseFloat(adaptedSecondNumber)
-    const floatThirdNumber = parseFloat(adaptedThirdNumber)
-    const floatFourthNumber = parseFloat(adaptedFourthNumber)
-
-    let result = 0
+    let result = new BigNumber(0)
 
     if (secondOperation === operations.plus) {
-      result = parseFloat(
-        (floatSecondNumber + floatThirdNumber).toFixed(fractionDigit)
+      result = new BigNumber(
+        (floatSecondNumber.plus(floatThirdNumber)).toFixed(fractionDigit)
       )
     }
 
     if (secondOperation === operations.minus) {
-      result = parseFloat(
-        (floatSecondNumber - floatThirdNumber).toFixed(fractionDigit)
+      result = new BigNumber(
+        (floatSecondNumber.minus(floatThirdNumber)).toFixed(fractionDigit)
       )
     }
 
     if (secondOperation === operations.mult) {
-      result = parseFloat(
-        (floatSecondNumber * floatThirdNumber).toFixed(fractionDigit)
+      result = new BigNumber(
+        (floatSecondNumber.multipliedBy(floatThirdNumber)).toFixed(fractionDigit)
       )
     }
 
     if (secondOperation === operations.div) {
-      result = parseFloat(
-        (floatSecondNumber / floatThirdNumber).toFixed(fractionDigit)
+      result = new BigNumber(
+        (floatSecondNumber.dividedBy(floatThirdNumber)).toFixed(fractionDigit)
       )
     }
 
+    console.log(result.toFixed(fractionDigit))
+
     if (thirdOperation === operations.mult) {
-      result = parseFloat((result * floatFourthNumber).toFixed(fractionDigit))
+      result = new BigNumber((result.multipliedBy(floatFourthNumber)).toFixed(fractionDigit))
     }
 
     if (thirdOperation === operations.div) {
-      result = parseFloat((result / floatFourthNumber).toFixed(fractionDigit))
+      result = new BigNumber((result.dividedBy(floatFourthNumber)).toFixed(fractionDigit))
     }
 
     if (firstOperation === operations.plus) {
-      result = parseFloat((floatFirstNumber + result).toFixed(fractionDigit))
+      result = new BigNumber((floatFirstNumber.plus(result)).toFixed(fractionDigit))
     }
 
     if (firstOperation === operations.minus) {
-      result = parseFloat((floatFirstNumber - result).toFixed(fractionDigit))
+      result = new BigNumber((floatFirstNumber.minus(result)).toFixed(fractionDigit))
     }
 
     if (firstOperation === operations.mult) {
-      result = parseFloat((floatFirstNumber * result).toFixed(fractionDigit))
+      result = new BigNumber((floatFirstNumber.multipliedBy(result)).toFixed(fractionDigit))
     }
 
     if (firstOperation === operations.div) {
-      result = parseFloat((floatFirstNumber / result).toFixed(fractionDigit))
+      result = new BigNumber((floatFirstNumber.dividedBy(result)).toFixed(fractionDigit))
     }
 
     if (thirdOperation === operations.plus) {
-      result = parseFloat((result + floatFourthNumber).toFixed(fractionDigit))
+      result = new BigNumber((result.plus(floatFourthNumber)).toFixed(fractionDigit))
     }
 
     if (thirdOperation === operations.minus) {
-      result = parseFloat((result - floatFourthNumber).toFixed(fractionDigit))
+      result = new BigNumber((result.minus(floatFourthNumber)).toFixed(fractionDigit))
     }
 
     setResult(result.toFixed(fractionDigit))
